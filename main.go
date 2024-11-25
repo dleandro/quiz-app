@@ -1,7 +1,17 @@
 package main
 
-import "fmt"
+import (
+    "quiz-cli/cmd"
+)
 
 func main() {
-    fmt.Println("Hello, World!")
+    cmd.Execute()
 }
+
+// TODO: grpc calls
+// getQuestionWithAnswers
+// saveAnswers
+// getStats()
+
+// optional 
+// addQuestionWithAnswers
