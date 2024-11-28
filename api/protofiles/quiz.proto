@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package protofiles;
+option go_package = "quiz-cli/api/protofiles/quizz";
+
+service QuizService {
+    rpc GetQuestions (Empty) returns (QuestionsResponse);
+}
+
+message Empty {}
+
+message Question {
+    string question = 1;
+    repeated string options = 2;
+    string answer = 3;
+}
+
+message QuestionsResponse {
+    repeated Question questions = 1;
+}
