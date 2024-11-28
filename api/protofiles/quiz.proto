@@ -5,6 +5,8 @@ option go_package = "quiz-cli/api/protofiles/quizz";
 
 service QuizService {
     rpc GetQuestions (Empty) returns (QuestionsResponse);
+    rpc SaveResults (ResultsRequest) returns (ResultsResponse);
+    rpc GetStatistics (ResultsRequest) returns (StatisticsResponse);
 }
 
 message Empty {}
@@ -17,4 +19,26 @@ message Question {
 
 message QuestionsResponse {
     repeated Question questions = 1;
+}
+
+message ResultsRequest {
+    int32 correct_answers = 1;
+    int32 total_questions = 2;
+}
+
+message ResultsResponse {
+    string message = 1;
+}
+
+message StatisticsResponse {
+    float percentage_better_than = 1;
+}
+
+message ParticipantResult {
+    int32 correct_answers = 1;
+    int32 total_questions = 2;
+}
+
+message Result {
+    repeated ParticipantResult participant_results = 1;
 }

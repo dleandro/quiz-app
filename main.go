@@ -8,10 +8,5 @@ func main() {
     cmd.Execute()
 }
 
-// TODO: grpc calls
-// getQuestionWithAnswers
-// saveAnswers
-// getStats()
-
 // optional 
 // addQuestionWithAnswers

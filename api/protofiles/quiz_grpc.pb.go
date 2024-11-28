@@ -19,7 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	QuizService_GetQuestions_FullMethodName = "/protofiles.QuizService/GetQuestions"
+	QuizService_GetQuestions_FullMethodName  = "/protofiles.QuizService/GetQuestions"
+	QuizService_SaveResults_FullMethodName   = "/protofiles.QuizService/SaveResults"
+	QuizService_GetStatistics_FullMethodName = "/protofiles.QuizService/GetStatistics"
 )
 
 // QuizServiceClient is the client API for QuizService service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QuizServiceClient interface {
 	GetQuestions(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*QuestionsResponse, error)
+	SaveResults(ctx context.Context, in *ResultsRequest, opts ...grpc.CallOption) (*ResultsResponse, error)
+	GetStatistics(ctx context.Context, in *ResultsRequest, opts ...grpc.CallOption) (*StatisticsResponse, error)
 }
 
 type quizServiceClient struct {
@@ -47,11 +51,33 @@ func (c *quizServiceClient) GetQuestions(ctx context.Context, in *Empty, opts ..
 	return out, nil
 }
 
+func (c *quizServiceClient) SaveResults(ctx context.Context, in *ResultsRequest, opts ...grpc.CallOption) (*ResultsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ResultsResponse)
+	err := c.cc.Invoke(ctx, QuizService_SaveResults_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *quizServiceClient) GetStatistics(ctx context.Context, in *ResultsRequest, opts ...grpc.CallOption) (*StatisticsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StatisticsResponse)
+	err := c.cc.Invoke(ctx, QuizService_GetStatistics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QuizServiceServer is the server API for QuizService service.
 // All implementations must embed UnimplementedQuizServiceServer
 // for forward compatibility.
 type QuizServiceServer interface {
 	GetQuestions(context.Context, *Empty) (*QuestionsResponse, error)
+	SaveResults(context.Context, *ResultsRequest) (*ResultsResponse, error)
+	GetStatistics(context.Context, *ResultsRequest) (*StatisticsResponse, error)
 	mustEmbedUnimplementedQuizServiceServer()
 }
 
@@ -64,6 +90,12 @@ type UnimplementedQuizServiceServer struct{}
 
 func (UnimplementedQuizServiceServer) GetQuestions(context.Context, *Empty) (*QuestionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetQuestions not implemented")
+}
+func (UnimplementedQuizServiceServer) SaveResults(context.Context, *ResultsRequest) (*ResultsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveResults not implemented")
+}
+func (UnimplementedQuizServiceServer) GetStatistics(context.Context, *ResultsRequest) (*StatisticsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStatistics not implemented")
 }
 func (UnimplementedQuizServiceServer) mustEmbedUnimplementedQuizServiceServer() {}
 func (UnimplementedQuizServiceServer) testEmbeddedByValue()                     {}
@@ -104,6 +136,42 @@ func _QuizService_GetQuestions_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _QuizService_SaveResults_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResultsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QuizServiceServer).SaveResults(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: QuizService_SaveResults_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QuizServiceServer).SaveResults(ctx, req.(*ResultsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _QuizService_GetStatistics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResultsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QuizServiceServer).GetStatistics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: QuizService_GetStatistics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QuizServiceServer).GetStatistics(ctx, req.(*ResultsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // QuizService_ServiceDesc is the grpc.ServiceDesc for QuizService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +182,14 @@ var QuizService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetQuestions",
 			Handler:    _QuizService_GetQuestions_Handler,
+		},
+		{
+			MethodName: "SaveResults",
+			Handler:    _QuizService_SaveResults_Handler,
+		},
+		{
+			MethodName: "GetStatistics",
+			Handler:    _QuizService_GetStatistics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
