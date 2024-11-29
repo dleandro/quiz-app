@@ -56,6 +56,8 @@ go run ./cli/main.go
 
 The API should always be ran first or else the cli won't work due to not having connection. We could solve this with polling for connection in the future.
 
+Also to reset the results from past executions you can delete the results.pb file in the root of the repo
+
 Next steps:
 
 - Add a Quiz domain entity 

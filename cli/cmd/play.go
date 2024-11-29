@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
+
+	pb "quiz-cli/api/protofiles"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	pb "quiz-cli/api/protofiles"
 )
 
 var rootCmd = &cobra.Command{
@@ -30,13 +32,14 @@ func Execute() {
 
 func runQuiz() {
 	apiURL := os.Getenv("API_URL")
-    if apiURL == "" {
-        log.Fatalf("API_URL environment variable is not set")
+	apiPort := os.Getenv("API_PORT")
+    if apiURL == "" || apiPort == "" {
+        log.Fatalf("mandatory environment variables are not set. Check .env file for API_URL and API_PORT")
     }
 
 	ctx := context.Background()
 
-	conn, err := grpc.NewClient(apiURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(fmt.Sprintf("%s:%s", apiURL, apiPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
