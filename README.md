@@ -15,3 +15,4 @@ Next steps:
 - Dependency injection
 - Extract the Parsing and reading of proto files to infra adapters or aux methods (basically extracting duplicated code)
 - Reduce the amount of loops on the server getStats req
+- Error handling 
