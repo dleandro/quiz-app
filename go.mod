@@ -1,6 +1,6 @@
 module quiz-cli
 
-go 1.23.3
+go 1.23
 
 require google.golang.org/grpc v1.68.0
 

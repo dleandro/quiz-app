@@ -1,0 +1,15 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "50051:50051"
+    volumes:
+      - ./results.pb:/app/results.pb
+    networks:
+      - quiz-network
+      
+networks:
+  quiz-network:
+    driver: bridge

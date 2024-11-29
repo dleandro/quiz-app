@@ -1,7 +1,7 @@
 package main
 
 import (
-    "quiz-cli/cmd"
+    "quiz-cli/cli/cmd"
 )
 
 func main() {
