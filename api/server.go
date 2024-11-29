@@ -11,6 +11,7 @@ import (
 
 	pb "quiz-cli/api/protofiles"
 
+	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 )
@@ -23,7 +24,7 @@ type server struct {
 const resultsFile = "results.pb"
 
 func (s *server) GetQuestions(ctx context.Context, in *pb.Empty) (*pb.QuestionsResponse, error) {
-    fmt.Println("A request to get questions has been received")
+    log.Println("A request to get questions has been received")
     questions := []*pb.Question{
         {Question: "What is the capital of France?", Options: []string{"Berlin", "Madrid", "Paris", "Rome"}, Answer: "Paris"},
         {Question: "What is the capital of Germany?", Options: []string{"Berlin", "Madrid", "Paris", "Rome"}, Answer: "Berlin"},
@@ -32,7 +33,7 @@ func (s *server) GetQuestions(ctx context.Context, in *pb.Empty) (*pb.QuestionsR
 }
 
 func (s *server) SaveResults(ctx context.Context, in *pb.ResultsRequest) (*pb.ResultsResponse, error) {
-    fmt.Println("A request to save quiz results has been received")
+    log.Println("A request to save quiz results has been received")
     s.mu.Lock()
     defer s.mu.Unlock()
 
@@ -66,7 +67,7 @@ func (s *server) SaveResults(ctx context.Context, in *pb.ResultsRequest) (*pb.Re
 }
 
 func (s *server) GetStatistics(ctx context.Context, in *pb.ResultsRequest) (*pb.StatisticsResponse, error) {
-    fmt.Println("A request to get quiz stats has been received")
+    log.Println("A request to get quiz stats has been received")
 
     s.mu.Lock()
     defer s.mu.Unlock()
@@ -108,13 +109,24 @@ func (s *server) GetStatistics(ctx context.Context, in *pb.ResultsRequest) (*pb.
 }
 
 func main() {
-    lis, err := net.Listen("tcp", ":50051")
+	// Load environment variables from .env file
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatalf("Error loading .env file")
+    }
+
+	port := os.Getenv("API_PORT")
+    if port == "" {
+        port = "50051" // Default port if API_PORT is not set
+    }
+
+    lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
     if err != nil {
         log.Fatalf("failed to listen: %v", err)
     }
     s := grpc.NewServer()
     pb.RegisterQuizServiceServer(s, &server{})
-    fmt.Println("Server is running on port 50051")
+    log.Println("Server is running on port 50051")
     if err := s.Serve(lis); err != nil {
         log.Fatalf("failed to serve: %v", err)
     }

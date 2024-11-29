@@ -4,6 +4,12 @@ FROM golang:1.23-alpine
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
+# Define build argument for the port
+ARG PORT
+
+# Set the environment variable for the port
+ENV PORT=${PORT}
+
 # Copy go mod and sum files
 COPY go.mod go.sum ./
 
@@ -13,8 +19,11 @@ RUN go mod download
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# Expose port 50051 to the outside world
-EXPOSE 50051
+# Build the Go server app
+RUN go build -o server ./api
+
+# Expose the port
+EXPOSE ${PORT}
 
 # Command to run the executable
-CMD ["go", "run", "api/server.go"]
+CMD ["sh", "-c", "./server"]

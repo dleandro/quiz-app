@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -24,15 +23,20 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
 
 func runQuiz() {
+	apiURL := os.Getenv("API_URL")
+    if apiURL == "" {
+        log.Fatalf("API_URL environment variable is not set")
+    }
+
 	ctx := context.Background()
 
-	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(apiURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("did not connect: %v", err)
 	}
@@ -56,7 +60,7 @@ func runQuiz() {
 		_, result, err := prompt.Run()
 
 		if err != nil {
-			fmt.Printf("Prompt failed %v\n", err)
+			log.Printf("Prompt failed %v\n", err)
 			return
 		}
 
@@ -81,6 +85,6 @@ func runQuiz() {
 		log.Fatalf("could not save results: %v", err)
 	}
 
-	fmt.Printf("You answered %d out of %d questions correctly.\n", correctAnswers, len(r.Questions))
-	fmt.Printf("You were better than %.f%% of all quizzers.\n", stats.PercentageBetterThan)
+	log.Printf("You answered %d out of %d questions correctly.\n", correctAnswers, len(r.Questions))
+	log.Printf("You were better than %.f%% of all quizzers.\n", stats.PercentageBetterThan)
 }

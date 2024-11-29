@@ -3,13 +3,15 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.api
+      args:
+        PORT: 50051
     ports:
       - "50051:50051"
     volumes:
       - ./results.pb:/app/results.pb
     networks:
       - quiz-network
-      
+
 networks:
   quiz-network:
     driver: bridge
