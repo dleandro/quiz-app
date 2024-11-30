@@ -52,6 +52,12 @@ go run ./api/server.go
 go run ./cli/main.go
 ```
 
+### Run the tests
+
+```sh
+go run ./api
+```
+
 ## Important notes
 
 The API should always be ran first or else the cli won't work due to not having connection. We could solve this with polling for connection in the future.
@@ -62,8 +68,6 @@ Next steps:
 
 - Add a Quiz domain entity 
 - Separate each endpoint in its own controller file
-- Docker compose
-- Add ability to manage the available questions (this would require authentication)
 - Refactor the cli code in order to be more testable for example by sending results in the end instead of logging
 - Could have adapters for the dependencies
 - Dependency injection

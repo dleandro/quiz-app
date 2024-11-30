@@ -16,6 +16,3 @@ func main() {
 
     cmd.Execute()
 }
-
-// optional 
-// addQuestionWithAnswers

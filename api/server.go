@@ -6,14 +6,17 @@ import (
 	"log"
 	"net"
 	"os"
+	"path/filepath"
 	"sort"
 	"sync"
 
 	pb "quiz-cli/api/protofiles"
 
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
+    "quiz-cli/utils"
 )
 
 type server struct {
@@ -21,15 +24,58 @@ type server struct {
     mu sync.Mutex
 }
 
-const resultsFile = "results.pb"
+var resultsFile string
+var questionsFile string
+
+func main() {
+
+	projectRoot, err := utils.FindProjectRoot()
+    if err != nil {
+        log.Fatalf("Error finding project root: %v", err)
+    }
+
+	dataPath := filepath.Join(projectRoot, "data")
+
+    // Construct the file paths relative to the root of the project
+    resultsFile = filepath.Join(dataPath, "results.pb")
+    questionsFile = filepath.Join(dataPath, "questions.pb")
+	
+	// Load environment variables from .env file
+    err = godotenv.Load(filepath.Join(projectRoot, ".env"))
+    if err != nil {
+        log.Fatalf("Error loading .env file")
+    }
+
+	port := os.Getenv("API_PORT")
+    if port == "" {
+        port = "50051" // Default port if API_PORT is not set
+    }
+
+    lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+    if err != nil {
+        log.Fatalf("failed to listen: %v", err)
+    }
+    s := grpc.NewServer()
+    pb.RegisterQuizServiceServer(s, &server{})
+    log.Println("Server is running on port", port)
+    if err := s.Serve(lis); err != nil {
+        log.Fatalf("failed to serve: %v", err)
+    }
+}
 
 func (s *server) GetQuestions(ctx context.Context, in *pb.Empty) (*pb.QuestionsResponse, error) {
     log.Println("A request to get questions has been received")
-    questions := []*pb.Question{
-        {Question: "What is the capital of France?", Options: []string{"Berlin", "Madrid", "Paris", "Rome"}, Answer: "Paris"},
-        {Question: "What is the capital of Germany?", Options: []string{"Berlin", "Madrid", "Paris", "Rome"}, Answer: "Berlin"},
+    var questionsWrapper pb.QuestionsResponse
+    if _, err := os.Stat(questionsFile); err == nil {
+        data, err := os.ReadFile(questionsFile)
+        if err != nil {
+            return nil, err
+        }
+        if err := proto.Unmarshal(data, &questionsWrapper); err != nil {
+            return nil, err
+        }
     }
-    return &pb.QuestionsResponse{Questions: questions}, nil
+    return &pb.QuestionsResponse{Questions: questionsWrapper.Questions}, nil
 }
 
 func (s *server) SaveResults(ctx context.Context, in *pb.ResultsRequest) (*pb.ResultsResponse, error) {
@@ -108,26 +154,71 @@ func (s *server) GetStatistics(ctx context.Context, in *pb.ResultsRequest) (*pb.
     return &pb.StatisticsResponse{PercentageBetterThan: percentageBetterThan}, nil
 }
 
-func main() {
-	// Load environment variables from .env file
-    err := godotenv.Load()
+func (s *server) CreateQuestion(ctx context.Context, in *pb.CreateQuestionRequest) (*pb.CreateQuestionResponse, error) {
+    log.Println("A request to create a question has been received")
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    var questionsWrapper pb.QuestionsResponse
+    if _, err := os.Stat(questionsFile); err == nil {
+        data, err := os.ReadFile(questionsFile)
+        if err != nil {
+            return nil, err
+        }
+        if err := proto.Unmarshal(data, &questionsWrapper); err != nil {
+            return nil, err
+        }
+    }
+    questions := questionsWrapper.Questions
+
+    question := in.Question
+    question.Id = uuid.New().String()
+    questions = append(questions, question)
+
+    data, err := proto.Marshal(&pb.QuestionsResponse{Questions: questions})
     if err != nil {
-        log.Fatalf("Error loading .env file")
+        return nil, err
+    }
+    if err := os.WriteFile(questionsFile, data, 0644); err != nil {
+        return nil, err
     }
 
-	port := os.Getenv("API_PORT")
-    if port == "" {
-        port = "50051" // Default port if API_PORT is not set
-    }
-
-    lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
-    if err != nil {
-        log.Fatalf("failed to listen: %v", err)
-    }
-    s := grpc.NewServer()
-    pb.RegisterQuizServiceServer(s, &server{})
-    log.Println("Server is running on port 50051")
-    if err := s.Serve(lis); err != nil {
-        log.Fatalf("failed to serve: %v", err)
-    }
+    return &pb.CreateQuestionResponse{Message: "Question created successfully"}, nil
 }
+
+func (s *server) DeleteQuestion(ctx context.Context, in *pb.DeleteQuestionRequest) (*pb.DeleteQuestionResponse, error) {
+    log.Println("A request to delete a question has been received")
+    s.mu.Lock()
+    defer s.mu.Unlock()
+
+    var questionResponse pb.QuestionsResponse
+    if _, err := os.Stat(questionsFile); err == nil {
+        data, err := os.ReadFile(questionsFile)
+        if err != nil {
+            return nil, err
+        }
+        if err := proto.Unmarshal(data, &questionResponse); err != nil {
+            return nil, err
+        }
+    }
+
+	var questions = questionResponse.Questions
+
+    for i, q := range questions {
+        if q.Id == in.Id {
+            questions = append(questions[:i], questions[i+1:]...)
+            break
+        }
+    }
+
+    data, err := proto.Marshal(&pb.QuestionsResponse{Questions: questions})
+    if err != nil {
+        return nil, err
+    }
+    if err := os.WriteFile(questionsFile, data, 0644); err != nil {
+        return nil, err
+    }
+
+    return &pb.DeleteQuestionResponse{Message: "Question deleted successfully"}, nil
+}
+

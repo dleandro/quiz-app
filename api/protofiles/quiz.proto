@@ -7,14 +7,17 @@ service QuizService {
     rpc GetQuestions (Empty) returns (QuestionsResponse);
     rpc SaveResults (ResultsRequest) returns (ResultsResponse);
     rpc GetStatistics (ResultsRequest) returns (StatisticsResponse);
+    rpc CreateQuestion (CreateQuestionRequest) returns (CreateQuestionResponse);
+    rpc DeleteQuestion (DeleteQuestionRequest) returns (DeleteQuestionResponse);
 }
 
 message Empty {}
 
 message Question {
-    string question = 1;
-    repeated string options = 2;
-    string answer = 3;
+    string id = 1;
+    string question = 2;
+    repeated string options = 3;
+    string answer = 4;
 }
 
 message QuestionsResponse {
@@ -32,6 +35,22 @@ message ResultsResponse {
 
 message StatisticsResponse {
     float percentage_better_than = 1;
+}
+
+message CreateQuestionRequest {
+    Question question = 1;
+}
+
+message CreateQuestionResponse {
+    string message = 1;
+}
+
+message DeleteQuestionRequest {
+    string id = 1;
+}
+
+message DeleteQuestionResponse {
+    string message = 1;
 }
 
 message ParticipantResult {
