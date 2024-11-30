@@ -49,7 +49,7 @@ go run ./api/server.go
 ### Running the CLI
 
 ```sh
-go run ./cli/main.go
+go run ./cli/app.go
 ```
 
 ### Run the tests
@@ -66,7 +66,6 @@ Also to reset the results from past executions you can delete the results.pb fil
 
 Next steps:
 
-- Add a Quiz domain entity 
 - Separate each endpoint in its own controller file
 - Refactor the cli code in order to be more testable for example by sending results in the end instead of logging
 - Could have adapters for the dependencies
