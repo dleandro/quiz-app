@@ -4,7 +4,7 @@
 // - protoc             v5.28.3
 // source: quiz.proto
 
-package quizz
+package protofiles
 
 import (
 	context "context"

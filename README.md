@@ -43,32 +43,35 @@ docker-compose up --build
 #### Or locally
 
 ```sh
-go run ./api/server.go
+go run ./api/server.go 
 ```
 
 ### Running the CLI
 
 ```sh
-go run ./cli/app.go
+go run ./cli/app.go [command]
 ```
 
 ### Run the tests
 
 ```sh
-go run ./api
+go test ./api
 ```
 
 ## Important notes
 
-The API should always be ran first or else the cli won't work due to not having connection. We could solve this with polling for connection in the future.
+* The API should always be ran first or else the cli won't work due to not having connection. We could solve this with polling for connection in the future.
 
-Also to reset the results from past executions you can delete the results.pb file in the root of the repo
+* To reset the results from past executions you can delete the results.pb file in the root of the repo.
+
+* When running the CLI application for the first time you should run it without any command to see every available command in the CLI.
 
 Next steps:
 
 - Separate each endpoint in its own controller file
-- Refactor the cli code in order to be more testable for example by sending results in the end instead of logging
-- Could have adapters for the dependencies
-- Dependency injection
 - Extract the Parsing and reading of proto files to infra adapters or aux methods (basically extracting duplicated code)
+- Refactor the cli code in order to be more testable for example by sending results in the end instead of logging
 - Error handling 
+- More tests specifically for the cli app and for sad paths of the different API endpoints
+- Could have adapters for the dependencies
+- Review the proto files because we have duplicates

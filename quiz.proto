@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package protofiles;
-option go_package = "quiz-cli/api/protofiles/quizz";
+option go_package = "api/protofiles";
 
 service QuizService {
     rpc GetQuestions (Empty) returns (QuestionsResponse);
